@@ -11,7 +11,7 @@ def runSim(redBot, blueBot):
   # however, this part can not be placed into a subfunction because importing files in a local function  
   # doesn't not update red_bot, blue_bot.
   # There might be a way to create red_bot and blue_bot as global variables, then this decision part can be placed in a sub fucntion.
-  validBot = [ "first_bot", "rollout_bot", "uniform_bot", "greedy_bot", "uct_bot", "fast_bot"];
+  validBot = [ "first_bot", "rollout_bot", "uniform_bot", "greedy_bot", "uct_bot", "fast_bot", "ta_bot"];
  
   a, chosenBotB =  blueBot 
   b, chosenBotR = redBot
@@ -32,6 +32,8 @@ def runSim(redBot, blueBot):
     import uct_bot as blue_bot
   elif chosenBotB == validBot[5]:
     import fast_bot as blue_bot
+  elif chosenBotB == validBot[6]:
+    import ta_bot as blue_bot
  
   if chosenBotR == validBot[0]:
     import first_bot as red_bot
@@ -45,6 +47,8 @@ def runSim(redBot, blueBot):
     import uct_bot as red_bot
   elif chosenBotR == validBot[5]:
     import fast_bot as red_bot
+  elif chosenBotB == validBot[6]:
+    import ta_bot as blue_bot
 
   BOTS = {'red': red_bot, 'blue': blue_bot}
 
