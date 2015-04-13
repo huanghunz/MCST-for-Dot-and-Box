@@ -63,12 +63,14 @@ class State(object):
 		return {p: sum([1 for box in self.game.boxes if self.box_owners.get(box) is p]) for p in self.game.players}
 
 	def get_my_score(self, me):
+		score = self.get_score()
 		if me == 'red':
 			return score['red'] #- score['blue']
 		else:
 			return score['blue']# - score['red']
 
 	def get_result(self, me):
+		score = self.get_score()
 		if me == 'red':
 			if (score['red'] > score['blue']): return 1
 			elif (score['red'] < score['blue']): return 0

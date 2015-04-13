@@ -14,8 +14,8 @@ class Node:
         self.childNodes = []
         self.wins = 0
         self.visits = 0
-        self.untriedMoves = state.GetMoves() # future child nodes
-        self.playerJustMoved = state.playerJustMoved # the only part of the state that the Node needs later
+        self.untriedMoves = state.get_moves() # future child nodes
+        self.playerJustMoved = state.get_whos_turn() # the only part of the state that the Node needs later
         
     def UCTSelectChild(self): # UCB
         """ Use the UCB1 formula to select a child node. Often a constant UCTK is applied so we have
@@ -68,43 +68,42 @@ class Node:
 
 
 def think(state, quip):
-	""" Conduct a UCT search for itermax iterations starting from rootstate.
-        Return the best move from the rootstate.
-        Assumes 2 alternating players (player 1 starts), with game results in the range [0.0, 1.0]."""
+    """ Conduct a UCT search for itermax iterations starting from rootstate.
+    Return the best move from the rootstate.
+    Assumes 2 alternating players (player 1 starts), with game results in the range [0.0, 1.0]."""
+    rootnode = Node(state = state)	
 
-	rootnode = Node(state = state)	
+    t_start = time.time()
+    t_deadline = t_start + THINK_DURATION
+    iterations = 0
 
-	t_start = time.time()
-	t_deadline = t_start + THINK_DURATION
-	iterations = 0
+    while True:
+        node = rootnode
+        stateCopy = state.copy()
 
-	while True:
-		node = rootnode
-	    stateCopy = state.copy()
-
-	    t_now = time.time()
-	    if t_now > t_deadline:
-	    	break
+        t_now = time.time()
+        if t_now > t_deadline:
+            break
 
 	    # Select
-	    while node.untriedMoves == [] and node.childNodes != []: # node is fully expanded and non-terminal
-	        node = node.UCTSelectChild() # based on UCB, x + c * sqrt (2ln * Pvisited/ stateVisited)
-	        stateCopy.apply_move(node.move)  # 
+        while node.untriedMoves == [] and node.childNodes != []: # node is fully expanded and non-terminal
+            node = node.UCTSelectChild() # based on UCB, x + c * sqrt (2ln * Pvisited/ stateVisited)
+            stateCopy.apply_move(node.move)  # 
 
 	    # Expand
-	    if node.untriedMoves != []: # if we can expand (i.e. state/node is non-terminal)
-	    	m = random.choice(node.untriedMoves) 
-	       	state.apply_move(m)
-	       	node = node.AddChild(m,state) # add child and descend tree
+        if node.untriedMoves != []: # if we can expand (i.e. state/node is non-terminal)
+            m = random.choice(node.untriedMoves) 
+            state.apply_move(m)
+            node = node.AddChild(m,state) # add child and descend tree
 
 	    # Rollout - this can often be made orders of magnitude quicker using a state.GetRandomMove() function
-	    while state.get_moves() != []: # while state is non-terminal
-	        state.apply_move(random.choice(state.get_moves()))
+        while state.get_moves() != []: # while state is non-terminal
+            state.apply_move(random.choice(state.get_moves()))
 
 	    # Backpropagate
-	    while node != None: # backpropagate from the expanded node and work back to the root node
-	        node.Update(state.get_result(state.get_whos_turn())) # state is terminal. Update node with result from POV of node.playerJustMoved
-	        node = node.parentNode
+        while node != None: # backpropagate from the expanded node and work back to the root node
+            node.Update(state.get_result(state.get_whos_turn())) # state is terminal. Update node with result from POV of node.playerJustMoved
+            node = node.parentNode
 
 	# Output some information about the tree - can be omitted
 	# if (verbose): print rootnode.TreeToString(0)
