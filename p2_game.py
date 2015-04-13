@@ -64,6 +64,7 @@ class State(object):
 
 	def get_my_score(self, me):
 		score = self.get_score()
+		print "ME", me
 		if me == 'red':
 			return score['red'] #- score['blue']
 		else:

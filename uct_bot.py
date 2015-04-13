@@ -24,8 +24,8 @@ class Node:
         """
         # choose the most urgent child giving a evaluation function
         # def lamba (c):
-       
-        s = sorted(self.childNodes, key = lambda c: c.wins/c.visits + sqrt(2*log(self.visits)/c.visits))[-1]
+        print "Select child"
+        s = sorted(self.childNodes, key = lambda c: (float)(c.wins/c.visits) + sqrt(2*log(self.visits)/c.visits))[-1]
 
         return s # a tuple
     
@@ -72,15 +72,13 @@ def think(state, quip):
     Return the best move from the rootstate.
     Assumes 2 alternating players (player 1 starts), with game results in the range [0.0, 1.0]."""
     rootnode = Node(state = state)	
-
     t_start = time.time()
     t_deadline = t_start + THINK_DURATION
     iterations = 0
-
+    node = rootnode
     while True:
-        node = rootnode
+        
         stateCopy = state.copy()
-
         t_now = time.time()
         if t_now > t_deadline:
             break
@@ -88,21 +86,23 @@ def think(state, quip):
 	    # Select
         while node.untriedMoves == [] and node.childNodes != []: # node is fully expanded and non-terminal
             node = node.UCTSelectChild() # based on UCB, x + c * sqrt (2ln * Pvisited/ stateVisited)
-            stateCopy.apply_move(node.move)  # 
+            stateCopy.apply_move(node.move)  #
+
 
 	    # Expand
         if node.untriedMoves != []: # if we can expand (i.e. state/node is non-terminal)
             m = random.choice(node.untriedMoves) 
-            state.apply_move(m)
-            node = node.AddChild(m,state) # add child and descend tree
+            stateCopy.apply_move(m)
+            #print "M: ", m
+            node = node.AddChild(m,stateCopy) # add child and descend tree
 
 	    # Rollout - this can often be made orders of magnitude quicker using a state.GetRandomMove() function
-        while state.get_moves() != []: # while state is non-terminal
-            state.apply_move(random.choice(state.get_moves()))
+        while stateCopy.get_moves() != []: # while state is non-terminal
+            stateCopy.apply_move(random.choice(stateCopy.get_moves()))
 
 	    # Backpropagate
         while node != None: # backpropagate from the expanded node and work back to the root node
-            node.Update(state.get_result(state.get_whos_turn())) # state is terminal. Update node with result from POV of node.playerJustMoved
+            node.Update(stateCopy.get_result(node.playerJustMoved)) # state is terminal. Update node with result from POV of node.playerJustMoved
             node = node.parentNode
 
 	# Output some information about the tree - can be omitted
