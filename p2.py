@@ -7,49 +7,8 @@ wins = defaultdict(lambda: 0)
 
 def runSim(redBot, blueBot):
 
-  # instead of manully importing file name, use command line option to choose bots to play
-  # however, this part can not be placed into a subfunction because importing files in a local function  
-  # doesn't not update red_bot, blue_bot.
-  # There might be a way to create red_bot and blue_bot as global variables, then this decision part can be placed in a sub fucntion.
-  validBot = [ "first_bot", "rollout_bot", "uniform_bot", "greedy_bot", "uct_bot", "fast_bot", "ta_bot"];
- 
-  a, chosenBotB =  blueBot 
-  b, chosenBotR = redBot
-  if chosenBotB not in validBot :
-    sys.exit(chosenBotB + " is not an valid bot");
-  if chosenBotR not in validBot:
-    sys.exit(chosenBotR + " is not an valid bot");
-    
-  if chosenBotB == validBot[0]:
-    import first_bot as blue_bot
-  elif chosenBotB == validBot[1]:
-    import rollout_bot as blue_bot
-  elif chosenBotB == validBot[2]:
-    import uniform_bot as blue_bot
-  elif chosenBotB == validBot[3]:
-    import greedy_bot as blue_bot
-  elif chosenBotB == validBot[4]:
-    import uct_bot as blue_bot
-  elif chosenBotB == validBot[5]:
-    import fast_bot as blue_bot
-  elif chosenBotB == validBot[6]:
-    import ta_bot as blue_bot
- 
-  if chosenBotR == validBot[0]:
-    import first_bot as red_bot
-  elif chosenBotR == validBot[1]:
-    import rollout_bot as red_bot
-  elif chosenBotR == validBot[2]:
-    import uniform_bot as red_bot
-  elif chosenBotR == validBot[3]:
-    import greedy_bot as red_bot
-  elif chosenBotR == validBot[4]:
-    import uct_bot as red_bot
-  elif chosenBotR == validBot[5]:
-    import fast_bot as red_bot
-  elif chosenBotR == validBot[6]:
-    import ta_bot as red_bot
-
+  red_bot = __import__(redBot)
+  blue_bot = __import__ (blueBot)
 
   BOTS = {'red': red_bot, 'blue': blue_bot}
 
@@ -107,6 +66,8 @@ if __name__ ==  '__main__':
  
   if len(args) != 0:  sys.exit( "Invalid argument(s): " + str(args) );
 
-  runSim(("red", options.red), ("blue", options.blue) )
+ 
+
+  runSim(options.blue, options.red )
  
 
