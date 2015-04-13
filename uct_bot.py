@@ -74,6 +74,13 @@ def think(state, quip):
  
     iterations = 0
     rolloutRate = 0
+
+    def opponentScore(score, opponent):
+        if opponent == 'red':
+            return score['red'] - score['blue']
+        else:
+            return score['blue'] - score['red']
+
     while t_now < t_deadline:
 
         node = rootnode
@@ -97,7 +104,7 @@ def think(state, quip):
 	    # Backpropagate
         score = stateCopy.get_score()
         while node != None: # backpropagate from the expanded node and work back to the root node
-            result = score[node.playerJustMoved]
+            result = opponentScore(score, node.playerJustMoved)
             node.Update(result)
             node = node.parentNode
 
