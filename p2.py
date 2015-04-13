@@ -42,6 +42,7 @@ def runSim(redBot, blueBot):
 def default(str):
   return str + ' [Default: %default]'
 
+
 if __name__ ==  '__main__':
   import sys
 
@@ -65,8 +66,6 @@ if __name__ ==  '__main__':
 
  
   if len(args) != 0:  sys.exit( "Invalid argument(s): " + str(args) );
-
- 
 
   runSim(options.blue, options.red )
  

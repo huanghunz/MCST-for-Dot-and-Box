@@ -68,7 +68,7 @@ def think(state, quip):
     Return the best move from the rootstate.
     Assumes 2 alternating players (player 1 starts), with game results in the range [0.0, 1.0]."""
     rootnode = Node(state = state)
-    t_start = time.time()	
+    t_start = time.time()   
     t_now = time.time()
     t_deadline = t_now + THINK_DURATION
  
@@ -83,18 +83,20 @@ def think(state, quip):
             node = node.UCTSelectChild() # based on UCB, x + c * sqrt (2ln * Pvisited/ stateVisited)
             stateCopy.apply_move(node.move)  #
 
-	    # Expand
+        # Expand
         if node.untriedMoves != []: # if we can expand (i.e. state/node is non-terminal)
             m = random.choice(node.untriedMoves) 
             p = state.get_whos_turn()
             stateCopy.apply_move(m)
             node = node.AddChild(m,stateCopy) # add child and descend tree
 
-	    # Rollout - this can often be made orders of magnitude quicker using a state.GetRandomMove() function
-        while stateCopy.get_moves() != []: # while state is non-terminal
+        # Rollout - this can often be made orders of magnitude quicker using a state.GetRandomMove() function
+        depth = 5
+        while stateCopy.get_moves() != [] and  depth > 0: # while state is non-terminal
+            depth -=1
             stateCopy.apply_move(random.choice(stateCopy.get_moves()))
       
-	    # Backpropagate
+        # Backpropagate
         score = stateCopy.get_score()
         while node != None: # backpropagate from the expanded node and work back to the root node
             result = score[node.playerJustMoved]
@@ -105,7 +107,7 @@ def think(state, quip):
         t_now = time.time()
 
     rolloutRate = float(iterations)/(t_now - t_start) 
-    print "Auto-Bots rollout (rate):", rolloutRate
+    print "Fast auto-Bots rollout (rate):", rolloutRate
     return sorted(rootnode.childNodes, key = lambda c: c.visits)[-1].move # return the move that was most visited
 
 
