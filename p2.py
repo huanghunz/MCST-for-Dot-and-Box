@@ -1,7 +1,7 @@
 from p2_game import Game, State
 from collections import defaultdict
 
-rounds = 100
+rounds = 10
 wins = defaultdict(lambda: 0)
 
 
@@ -47,8 +47,9 @@ def runSim(redBot, blueBot):
     import uct_bot as red_bot
   elif chosenBotR == validBot[5]:
     import fast_bot as red_bot
-  elif chosenBotB == validBot[6]:
-    import ta_bot as blue_bot
+  elif chosenBotR == validBot[6]:
+    import ta_bot as red_bot
+
 
   BOTS = {'red': red_bot, 'blue': blue_bot}
 

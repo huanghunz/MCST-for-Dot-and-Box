@@ -1,6 +1,6 @@
 import time
 import random
-
+import math
 THINK_DURATION = 1
 
 
@@ -15,7 +15,8 @@ class Node:
         self.wins = 0
         self.visits = 0
         self.untriedMoves = state.get_moves() # future child nodes
-        self.playerJustMoved = state.get_whos_turn() # the only part of the state that the Node needs later
+        self.playerJustMoved = state.playerJustMoved
+        #self.playerJustMoved = lastPlayer # the only part of the state that the Node needs later
         
     def UCTSelectChild(self): # UCB
         """ Use the UCB1 formula to select a child node. Often a constant UCTK is applied so we have
@@ -24,10 +25,9 @@ class Node:
         """
         # choose the most urgent child giving a evaluation function
         # def lamba (c):
-        print "Select child"
-        s = sorted(self.childNodes, key = lambda c: (float)(c.wins/c.visits) + sqrt(2*log(self.visits)/c.visits))[-1]
-
-        return s # a tuple
+        #print "Select child"
+        s = sorted(self.childNodes, key = lambda c: (float(c.wins)/float(c.visits)) + math.sqrt(2 * math.log(float(self.visits) / float(c.visits))))
+        return s[-1]# a tuple
     
     def AddChild(self, m, s):
         """ Remove m from untriedMoves and add a new child node for this move.
@@ -71,19 +71,18 @@ def think(state, quip):
     """ Conduct a UCT search for itermax iterations starting from rootstate.
     Return the best move from the rootstate.
     Assumes 2 alternating players (player 1 starts), with game results in the range [0.0, 1.0]."""
-    rootnode = Node(state = state)	
-    t_start = time.time()
-    t_deadline = t_start + THINK_DURATION
+    rootnode = Node(state = state)
+    t_start = time.time()	
+    t_now = time.time()
+    t_deadline = t_now + THINK_DURATION
+    #print t_deadline, "VS: ", t_start
     iterations = 0
-    node = rootnode
-    while True:
-        
-        stateCopy = state.copy()
-        t_now = time.time()
-        if t_now > t_deadline:
-            break
+    rolloutRate = 0
+    while t_now < t_deadline:
 
-	    # Select
+        node = rootnode
+        stateCopy = state.copy()         
+
         while node.untriedMoves == [] and node.childNodes != []: # node is fully expanded and non-terminal
             node = node.UCTSelectChild() # based on UCB, x + c * sqrt (2ln * Pvisited/ stateVisited)
             stateCopy.apply_move(node.move)  #
@@ -92,24 +91,33 @@ def think(state, quip):
 	    # Expand
         if node.untriedMoves != []: # if we can expand (i.e. state/node is non-terminal)
             m = random.choice(node.untriedMoves) 
+            p = state.get_whos_turn()
             stateCopy.apply_move(m)
-            #print "M: ", m
             node = node.AddChild(m,stateCopy) # add child and descend tree
 
 	    # Rollout - this can often be made orders of magnitude quicker using a state.GetRandomMove() function
         while stateCopy.get_moves() != []: # while state is non-terminal
             stateCopy.apply_move(random.choice(stateCopy.get_moves()))
-
+            #print "stateCopy.get_moves()"
+            
 	    # Backpropagate
+        
+        score = stateCopy.get_score()
         while node != None: # backpropagate from the expanded node and work back to the root node
-            node.Update(stateCopy.get_result(node.playerJustMoved)) # state is terminal. Update node with result from POV of node.playerJustMoved
+            result = score[node.playerJustMoved]
+            node.Update(result)
             node = node.parentNode
+
+            #print "Backprop"
+        iterations += 1
+        t_now = time.time()
 
 	# Output some information about the tree - can be omitted
 	# if (verbose): print rootnode.TreeToString(0)
 	# else: print rootnode.ChildrenToString() 
-
-	return sorted(rootnode.childNodes, key = lambda c: c.visits)[-1].move # return the move that was most visited
+    rolloutRate = float(iterations)/(t_now - t_start) 
+    print "Auto-Bots rollout (rate):", rolloutRate
+    return sorted(rootnode.childNodes, key = lambda c: c.visits)[-1].move # return the move that was most visited
 
 
 
